@@ -44,7 +44,7 @@ pub async fn init_bot_client(
     // Set up the song queue to be accessible between command calls
     {
         let mut data = client.data.write().await;
-        data.insert::<BotState>(Arc::new(RwLock::new(SongQueue::default())));
+        data.insert::<BotState>(Arc::new(RwLock::new(SongQueue::new().await)));
     }
 
     Ok(client)

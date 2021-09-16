@@ -27,5 +27,5 @@ pub async fn leave_guild_voice_channels(ctx: &Context, guild: GuildId) {
         .expect("Songbird Voice client placed in at initialization.");
 
     // Get the caller's voice channel
-    manager.leave(guild).await.unwrap();
+    let _ = manager.remove(guild).await;
 }

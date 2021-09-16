@@ -1,11 +1,13 @@
+use std::sync::Arc;
+
 use serenity::{
     async_trait, client::EventHandler, framework::StandardFramework, model::prelude::Activity,
-    Client,
+    prelude::RwLock, Client,
 };
 use songbird::{SerenityInit, Songbird};
 use tracing::info;
 
-use crate::commands;
+use crate::{commands, song_queue::{BotState, SongQueue}};
 
 pub struct BotEventHandler;
 
@@ -39,14 +41,11 @@ pub async fn init_bot_client(
         .register_songbird_with(voice)
         .await?;
 
-    // // Open the bot config for writing, and clone the config struct into it
-    // {
-    //     let mut data = client.data.write().await;
-    //     data.insert::<BotState>(Arc::new(RwLock::new(State {
-    //         config: config.clone(),
-    //         startup_time: Utc::now(),
-    //     })));
-    // }
+    // Set up the song queue to be accessible between command calls
+    {
+        let mut data = client.data.write().await;
+        data.insert::<BotState>(Arc::new(RwLock::new(SongQueue::default())));
+    }
 
     Ok(client)
 }

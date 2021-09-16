@@ -39,3 +39,4 @@ songbird = { git = "https://github.com/serenity-rs/songbird", branch = "current"
     "gateway",
     "default"
 ] }
+url = "2.2"

@@ -6,6 +6,8 @@ use tracing::log::error;
 mod commands;
 mod event_handler;
 mod song_queue;
+mod guild_utils;
+mod audio;
 
 #[tokio::main]
 async fn main() {

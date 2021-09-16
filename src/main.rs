@@ -1,11 +1,14 @@
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg};
 
+use crate::event_handler::init_bot_client;
+use tracing::log::error;
+
 mod commands;
-mod song_queue;
 mod event_handler;
+mod song_queue;
 
 #[tokio::main]
-fn main() {
+async fn main() {
     let matches = App::new(crate_name!())
         .author(crate_authors!())
         .about(crate_description!())
@@ -19,11 +22,27 @@ fn main() {
         )
         .get_matches();
 
+    // Enable logging
+    tracing_subscriber::fmt::init();
+
     // Get data
-    let dev_guild = matches.value_of("dev_guild").unwrap();
+    let dev_guild = matches.value_of("dev_guild");
 
     // Pull in data from the environment
-    let token = std::env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set");
-    let guild_id = std::env::var("GUILD_ID").expect("GUILD_ID not set");
+    let discord_token = std::env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set");
+    let discord_app_id = std::env::var("DISCORD_APP_ID")
+        .expect("DISCORD_APP_ID not set")
+        .parse()
+        .expect("Application ID is not valid");
     // let sentry_
+
+    // Set up the bot client
+    let mut client = init_bot_client(&discord_token, &discord_app_id)
+        .await
+        .expect("Failed to init bot client");
+
+    // Run the client
+    if let Err(why) = client.start().await {
+        error!("Client error: {:?}", why);
+    }
 }

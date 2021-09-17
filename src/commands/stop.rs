@@ -2,6 +2,7 @@ use crate::{
     audio::{join_guild_voice_channel, leave_guild_voice_channels},
     guild_utils::{check_user_has_sound_role, maybe_create_sound_role},
 };
+use discord_utils::sentry_track_command;
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},
@@ -12,6 +13,7 @@ use tracing::info;
 
 #[command]
 pub async fn fuckoff(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_track_command!(msg);
     info!("Executing fuckoff command from user: {}", msg.author);
     let guild = msg.guild(&ctx).await.unwrap();
     let member = msg.member.as_ref().unwrap();

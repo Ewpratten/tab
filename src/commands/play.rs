@@ -1,4 +1,5 @@
 use crate::{audio::{join_guild_voice_channel, leave_guild_voice_channels}, guild_utils::{check_user_has_sound_role, maybe_create_sound_role}};
+use discord_utils::sentry_track_command;
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},
@@ -9,6 +10,7 @@ use tracing::info;
 
 #[command]
 pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_track_command!(msg);
     info!("Executing play command from user: {}", msg.author);
     let guild = msg.guild(&ctx).await.unwrap();
     let member = msg.member.as_ref().unwrap();
@@ -32,12 +34,12 @@ pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
             if let Some(channel_id) = member_vc {
                 // Leave and Join
                 leave_guild_voice_channels(&ctx, guild.id).await;
-                std::thread::sleep(std::time::Duration::from_secs(1));
+                std::thread::sleep(std::time::Duration::from_secs(3));
                 join_guild_voice_channel(&ctx, guild.id, channel_id).await;
 
                 let manager = songbird::get(ctx)
                     .await
-                    .expect("Songbird Voice client placed in at initialisation.")
+                    .expect("Songbird Voice client placed in at initialization.")
                     .clone();
 
                 if let Some(handler_lock) = manager.get(guild.id) {

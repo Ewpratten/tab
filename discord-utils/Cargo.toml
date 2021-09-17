@@ -1,19 +1,18 @@
 [package]
-name = "tab"
+name = "discord-utils"
 version = "0.1.0"
 authors = ["Evan Pratten <ewpratten@gmail.com>"]
 edition = "2018"
-description = "An educational youtube music bot for private discord servers"
+description = "Utilities for working with discord bots"
 readme = "README.md"
-homepage = "https://github.com/ewpratten/tab"
-repository = "https://github.com/ewpratten/tab"
+homepage = "https://github.com/ewpratten/discord-utils"
+repository = "https://github.com/ewpratten/discord-utils"
 license = "GPL-3.0"
 keywords = []
 categories = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-discord-utils = { version = "0.1", path = "./discord-utils" }
 serenity = { version = "0.10", features = [
     "client",
     "gateway",
@@ -30,7 +29,7 @@ serenity = { version = "0.10", features = [
     "framework"
 ] }
 clap = "2.33"
-tokio = { version = "1.0", features = ["macros", "rt-multi-thread", "signal"] }
+tokio = { version = "1.0", features = ["macros", "signal"] }
 tracing = "0.1"
 tracing-subscriber = "0.2"
 tracing-futures = "0.2"
@@ -41,3 +40,4 @@ songbird = { git = "https://github.com/serenity-rs/songbird", branch = "current"
     "default"
 ] }
 url = "2.2"
+serde = { version = "1.0.126", features = ["derive"] }

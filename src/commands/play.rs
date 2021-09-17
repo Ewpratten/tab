@@ -1,5 +1,9 @@
-use crate::{ guild_utils::{check_user_has_sound_role, maybe_create_sound_role}};
-use discord_utils::{audio::controls::{join_guild_voice_channel, leave_guild_voice_channels}, sentry_track_command};
+use crate::guild_utils::{check_user_has_sound_role, maybe_create_sound_role};
+use discord_utils::{
+    audio::controls::{join_guild_voice_channel, leave_guild_voice_channels, play_youtube_url},
+    sentry_track_command,
+    user::get_user_voice_channel,
+};
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},
@@ -7,6 +11,7 @@ use serenity::{
 };
 use tracing::error;
 use tracing::info;
+use url::Url;
 
 #[command]
 pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
@@ -25,10 +30,7 @@ pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         // Fetch the URL to play
         if let Ok(yt_url) = args.single::<String>() {
             // Find where the member is in VC
-            let member_vc = guild
-                .voice_states
-                .get(&msg.author.id)
-                .and_then(|state| state.channel_id);
+            let member_vc = get_user_voice_channel(&guild, &msg.author.id);
 
             // Join VC
             if let Some(channel_id) = member_vc {
@@ -45,30 +47,20 @@ pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
                 if let Some(handler_lock) = manager.get(guild.id) {
                     let mut handler = handler_lock.lock().await;
                     // Get a source for "Mr Worldwide" entrance
-                    let source =
-                        match songbird::ytdl("https://www.youtube.com/watch?v=FGFrTFakGJo").await {
-                            Ok(source) => source,
-                            Err(why) => {
-                                error!("Err starting source: {:?}", why);
-                                return Ok(());
-                            }
-                        };
-
-                    handler.play_source(source);
+                    play_youtube_url(
+                        &Url::parse("https://www.youtube.com/watch?v=FGFrTFakGJo").unwrap(),
+                        &mut handler,
+                    )
+                    .await
+                    .expect("Failed to play youtube URL");
 
                     // Sleep through the video
                     std::thread::sleep(std::time::Duration::from_secs(3));
 
                     // Get the real video source
-                    let source = match songbird::ytdl(&yt_url).await {
-                        Ok(source) => source,
-                        Err(why) => {
-                            error!("Err starting source: {:?}", why);
-                            return Ok(());
-                        }
-                    };
-
-                    handler.play_source(source);
+                    play_youtube_url(&Url::parse(&yt_url).unwrap(), &mut handler)
+                        .await
+                        .expect("Failed to play youtube URL");
                 }
             } else {
                 msg.reply(&ctx.http, "You are not in a voice channel")

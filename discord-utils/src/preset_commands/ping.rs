@@ -1,4 +1,4 @@
-use discord_utils::sentry_track_command;
+use crate::sentry_track_command;
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},

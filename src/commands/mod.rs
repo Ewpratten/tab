@@ -1,8 +1,7 @@
 use serenity::framework::standard::macros::group;
-use ping::*;
+use discord_utils::preset_commands::ping::*;
 use play::*;
 use stop::*;
-mod ping;
 mod play;
 mod stop;
 

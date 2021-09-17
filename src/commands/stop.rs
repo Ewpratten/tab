@@ -1,8 +1,5 @@
-use crate::{
-    audio::{join_guild_voice_channel, leave_guild_voice_channels},
-    guild_utils::{check_user_has_sound_role, maybe_create_sound_role},
-};
-use discord_utils::sentry_track_command;
+use crate::guild_utils::{check_user_has_sound_role, maybe_create_sound_role};
+use discord_utils::{audio::controls::leave_guild_voice_channels, sentry_track_command};
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},

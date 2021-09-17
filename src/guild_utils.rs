@@ -1,4 +1,3 @@
-use sentry::User;
 use serenity::{
     client::Context,
     model::guild::{Guild, PartialMember},
@@ -12,7 +11,8 @@ pub fn check_user_has_sound_role(guild: &Guild, user: &PartialMember) -> bool {
         .iter()
         .filter(|(_id, role)| role.name == SOUND_ROLE_NAME)
         .next()
-        .unwrap().0;
+        .unwrap()
+        .0;
     user.roles.iter().any(|role| role == guild_sound_role_id)
 }
 

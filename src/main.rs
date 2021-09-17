@@ -1,14 +1,12 @@
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg};
-use discord_utils::environment::DiscordEnvVars;
+use discord_utils::{client::init_client, environment::DiscordEnvVars};
 
-use crate::event_handler::init_bot_client;
+use crate::event_handler::BotEventHandler;
 use tracing::log::error;
 
-mod audio;
 mod commands;
 mod event_handler;
 mod guild_utils;
-mod song_queue;
 
 #[tokio::main]
 async fn main() {
@@ -23,18 +21,25 @@ async fn main() {
 
     // Pull in data from the environment
     let bot_env = DiscordEnvVars::load();
-    let _guard = sentry::init((
-        bot_env.sentry_dsn,
-        sentry::ClientOptions {
-            release: sentry::release_name!(),
-            ..Default::default()
-        },
-    ));
+    if let Some(dsn) = &bot_env.sentry_dsn {
+        let _guard = sentry::init((
+            dsn.clone(),
+            sentry::ClientOptions {
+                release: sentry::release_name!(),
+                ..Default::default()
+            },
+        ));
+    }
 
     // Set up the bot client
-    let mut client = init_bot_client(&bot_env.bot_token, &bot_env.bot_app_id)
-        .await
-        .expect("Failed to init bot client");
+    let mut client = init_client(
+        &bot_env,
+        vec![&commands::BOTCOMMANDS_GROUP],
+        |c| c.allow_dm(true).prefix("!"),
+        BotEventHandler,
+    )
+    .await
+    .unwrap();
 
     // Run the client
     if let Err(why) = client.start().await {
